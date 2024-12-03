@@ -101,20 +101,13 @@ def is_spot_free(spot_elem):
 
 
 def did_it_book(driver):
-    iframes = driver.find_elements(By.TAG_NAME, "iframe")
-
-    response = False
-    if iframes:
-        driver.switch_to.frame(iframes[0])
-        response = (
-            "You have been successfully enrolled in the class highlighted below"
-            in driver.page_source
-        )
-        driver.switch_to.default_content()
-
-    return response
+    return (
+        "You have been successfully enrolled in the class highlighted below"
+        in driver.page_source
+    )
 
 
+has_booked_spot = False
 for spot in settings.studio.favorite_spots:
     spot_elem = driver.find_element(By.ID, f"spotcell{spot}")
     if is_spot_free(spot_elem):
@@ -125,7 +118,13 @@ for spot in settings.studio.favorite_spots:
         elem = driver.find_element(By.XPATH, "//a[contains(text(), 'Use USC')]")
         elem.click()
 
-        if did_it_book(driver):
-            logging.info(f"Booked.")
+        has_booked_spot = did_it_book(driver)
+        if has_booked_spot:
+            logging.info("Booked.")
 
         break
+
+if not has_booked_spot:
+    logging.info(
+        f"None of the favorite spots ({settings.studio.favorite_spots}) are available."
+    )
