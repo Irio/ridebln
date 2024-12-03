@@ -1,0 +1,12 @@
+[user]
+email = "my_email@example.com"
+password = "my_secret_password"
+
+[studio]
+name = "PRENZLAUER BERG"
+favorite_spots = [1, 2, 3]
+
+[[booking_criteria]]
+weekday = "mo"
+instructor = "Juan"
+time = "18:00"
