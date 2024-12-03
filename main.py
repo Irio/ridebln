@@ -47,6 +47,7 @@ def sign_in(driver):
 
     driver.switch_to.default_content()
 
+
 def sign_in_if_needed(driver):
     if does_need_sign_in(driver):
         sign_in(driver)
@@ -98,13 +99,17 @@ def is_spot_free(spot_elem):
     logging.info(f"Spot {spot} is {'free' if result else 'taken'}.")
     return result
 
+
 def did_it_book(driver):
     iframes = driver.find_elements(By.TAG_NAME, "iframe")
 
     response = False
     if iframes:
         driver.switch_to.frame(iframes[0])
-        response = "You have been successfully enrolled in the class highlighted below" in driver.page_source
+        response = (
+            "You have been successfully enrolled in the class highlighted below"
+            in driver.page_source
+        )
         driver.switch_to.default_content()
 
     return response
@@ -122,3 +127,5 @@ for spot in settings.studio.favorite_spots:
 
         if did_it_book(driver):
             logging.info(f"Booked.")
+
+        break
