@@ -24,7 +24,7 @@ Run the script to book a ride according to your preferences:
 python3 main.py
 ```
 
-For now, it supports booking for a single ride per run.
+For now, it supports booking for a single ride per run. Also, it does not check if you already have a booking for the said ride.
 
 ## Development
 
