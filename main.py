@@ -5,8 +5,7 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 
 from config import settings
-from page_helpers import did_it_book, is_spot_free, select_studio, sign_in_if_needed
-from page_helpers.schedule import find_ride
+from pages import RideBlnPage, SchedulePage, did_it_book, is_spot_free
 
 logging.basicConfig(level=logging.INFO)
 
@@ -18,14 +17,15 @@ driver.implicitly_wait(5)
 
 
 driver.get("https://www.ride-berlin.com/")
+site = RideBlnPage(driver)
+site.select_studio(settings.studio.name)
 
-select_studio(driver)
-
-driver.switch_to.frame(driver.find_element(By.TAG_NAME, "iframe"))
-ride_elem = find_ride(driver)
-
-driver.get(ride_elem.get_attribute("href"))
-sign_in_if_needed(driver)
+site = SchedulePage(driver)
+ride_url = site.ride_url(settings.booking_criteria[0])
+if not ride_url:
+    exit()
+driver.get(ride_url)
+site.sign_in_if_needed(settings.user)
 
 driver.switch_to.frame(driver.find_element(By.TAG_NAME, "iframe"))
 has_booked_spot = False
@@ -34,7 +34,7 @@ for spot in settings.studio.favorite_spots:
     if is_spot_free(spot_elem, spot):
         logging.info(f"Booking spot #{spot}...")
         spot_elem.click()
-        sign_in_if_needed(driver)
+        site.sign_in_if_needed(settings.user)
 
         elem = driver.find_element(By.XPATH, "//a[contains(text(), 'Use USC')]")
         elem.click()
