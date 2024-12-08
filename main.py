@@ -5,7 +5,7 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 
 from config import settings
-from pages import RideBlnPage, SchedulePage, did_it_book, is_spot_free
+from pages import RideBlnPage, StudioPage, did_it_book, is_spot_free
 
 logging.basicConfig(level=logging.INFO)
 
@@ -28,7 +28,7 @@ driver.get("https://www.ride-berlin.com/")
 site = RideBlnPage(driver)
 site.select_studio(settings.studio.name)
 
-site = SchedulePage(driver)
+site = StudioPage(driver)
 ride_url = site.ride_url(settings.booking_criteria[0])
 if not ride_url:
     exit()

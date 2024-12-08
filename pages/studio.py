@@ -5,7 +5,7 @@ from selenium.webdriver.common.by import By
 from pages.main import RideBlnPage
 
 
-class SchedulePage(RideBlnPage):
+class StudioPage(RideBlnPage):
     def __init__(self, driver):
         super().__init__(driver)
 
