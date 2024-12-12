@@ -32,3 +32,29 @@ For now, it supports booking for a single ride per run. Also, it does not check 
 isort --check .
 black --check .
 ```
+
+## Docker instructions
+
+1. Run the Application:
+
+```sh
+docker-compose up
+```
+
+2. Run linters:
+
+```sh
+docker-compose run app sh -c "isort --check . && black --check ."
+```
+
+3. Access the App Container for Debugging
+
+```sh
+docker-compose run app sh
+```
+
+4. Stop All Services
+
+```sh
+docker-compose down
+```

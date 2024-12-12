@@ -1,0 +1,28 @@
+version: "3.8"
+services:
+  app:
+    image: python:3.11-alpine  # Use a lightweight base image
+    volumes:
+      - .:/app
+    working_dir: /app
+    environment:
+      - DYNACONF_SETTINGS=settings.toml
+    command: >
+      sh -c "pip install -r requirements.txt && python3 main.py"
+    depends_on:
+      - chrome
+    networks:
+      - mynetwork
+    stdin_open: true
+    tty: true
+
+  chrome:
+    image: seleniarm/standalone-chromium  # ARM64-compatible Selenium image
+    environment:
+      - START_XVFB=false
+    networks:
+      - mynetwork
+
+networks:
+  mynetwork:
+    driver: bridge
