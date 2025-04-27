@@ -38,23 +38,23 @@ black --check .
 1. Run the Application:
 
 ```sh
-docker-compose up
+docker compose up
 ```
 
 2. Run linters:
 
 ```sh
-docker-compose run app sh -c "isort --check . && black --check ."
+docker compose run app sh -c "isort --check . && black --check ."
 ```
 
 3. Access the App Container for Debugging
 
 ```sh
-docker-compose run app sh
+docker compose run app sh
 ```
 
 4. Stop All Services
 
 ```sh
-docker-compose down
+docker compose down
 ```

@@ -1,7 +1,6 @@
-version: "3.8"
 services:
   app:
-    image: python:3.11-alpine  # Use a lightweight base image
+    image: python:3.13-alpine
     volumes:
       - .:/app
     working_dir: /app
@@ -17,7 +16,7 @@ services:
     tty: true
 
   chrome:
-    image: seleniarm/standalone-chromium  # ARM64-compatible Selenium image
+    image: seleniarm/standalone-chromium:124.0
     environment:
       - START_XVFB=false
     networks:
