@@ -14,6 +14,11 @@ browser_options = Options()
 browser_options.add_argument("--headless")
 browser_options.add_argument("--no-sandbox")
 browser_options.add_argument("--remote-allow-origins=*")
+browser_options.add_argument("--disable-dev-shm-usage")
+browser_options.add_argument("--disable-gpu")
+browser_options.add_argument("--window-size=1920,1080")
+browser_options.add_argument("--disable-extensions")
+browser_options.add_argument("--disable-software-rasterizer")
 
 if __name__ == "__main__":
     with webdriver.Remote(settings.browser_url, options=browser_options) as driver:
@@ -37,7 +42,8 @@ if __name__ == "__main__":
                 spot_elem.click()
                 site.sign_in_if_needed(settings.user)
 
-                elem = driver.find_element(By.XPATH, "//a[contains(text(), 'Use USC')]")
+                elem = driver.find_element(
+                    By.XPATH, "//a[contains(text(), 'Use USC')]")
                 elem.click()
 
                 has_booked_spot = did_it_book(driver)
