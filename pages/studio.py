@@ -24,7 +24,7 @@ class StudioPage(RideBlnPage):
 
         # XPath indexing is 1-based
         day_index = 1 + self._column_for_weekday(booking_details.weekday)
-        selector = f"//*[@id='reserve']//tbody//td[{day_index}]//div[span[contains(text(), '{booking_details.instructor}')] and span[contains(text(), '{booking_details.time}')]]//a"
+        selector = f"//*[@id='reserve']//tbody//td[{day_index}]//div[contains(@class, 'scheduleBlock')][.//span[contains(@class, 'scheduleInstruc') and contains(text(), '{booking_details.instructor}')]][.//span[contains(@class, 'scheduleTime') and contains(text(), '{booking_details.time}')]]//a"
         print(selector)
         elems = self.driver.find_elements(By.XPATH, selector)
 
