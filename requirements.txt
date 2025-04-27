@@ -3,5 +3,6 @@ selenium==4.27.1
 
 # dev
 black==24.10.0
+debugpy==1.8.14
 ipdb==0.13.13
 isort==5.13.2

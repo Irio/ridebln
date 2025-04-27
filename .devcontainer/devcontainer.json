@@ -1,0 +1,11 @@
+{
+  "dockerComposeFile": "../compose.yaml",
+  "service": "app",
+  "workspaceFolder": "/app",
+  "forwardPorts": [4444, 5900, 7900],
+  "customizations": {
+    "vscode": {
+      "extensions": ["ms-python.black-formatter", "ms-python.debugpy"]
+    }
+  }
+}

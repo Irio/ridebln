@@ -1,0 +1,30 @@
+services:
+  app:
+    build:
+      context: .
+    command: sleep infinity
+    depends_on:
+      - chrome
+    environment:
+      - DYNACONF_BROWSER_URL=http://chrome:4444/wd/hub
+    networks:
+      - mynetwork
+    stdin_open: true
+    tty: true
+    volumes:
+      - .:/app
+
+  chrome:
+    environment:
+      - START_XVFB=false
+    image: seleniarm/standalone-chromium:124.0
+    networks:
+      - mynetwork
+    ports:
+      - 4444:4444
+      - 5900:5900
+      - 7900:7900
+
+networks:
+  mynetwork:
+    driver: bridge

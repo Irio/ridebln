@@ -47,13 +47,13 @@ docker compose up
 docker compose run app sh -c "isort --check . && black --check ."
 ```
 
-3. Access the App Container for Debugging
+3. Access the App Container for Debugging:
 
 ```sh
 docker compose run app sh
 ```
 
-4. Stop All Services
+4. Stop All Services:
 
 ```sh
 docker compose down
