@@ -11,9 +11,17 @@ logging.basicConfig(level=logging.INFO)
 
 
 options = Options()
-options.add_argument("--headless=new")
-driver = webdriver.Chrome(options=options)
-driver.implicitly_wait(5)
+options.add_argument("--headless")
+options.add_argument("--no-sandbox")
+options.add_argument("--disable-dev-shm-usage")
+
+# Connect to the remote Selenium instance (seleniarm/standalone-chromium)
+driver = webdriver.Remote(
+    command_executor="http://chrome:4444/wd/hub",  # Replace 'chrome' with the name of the Chrome service in docker-compose
+    options=options
+)
+# driver = webdriver.Chrome(options=options)
+# driver.implicitly_wait(5)
 
 
 driver.get("https://www.ride-berlin.com/")
