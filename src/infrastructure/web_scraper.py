@@ -198,42 +198,40 @@ class RideBerlinScraper:
                         # Save complete HTML for inspection (including iframe content)
                 self._save_booking_page_content()
 
-                # Check for success by looking for alert element inside iframe
+                # Check for success - ONLY accept the exact success message
+                # "You have been successfully enrolled in the class highlighted below"
                 try:
-                    alert_elem = self.driver.find_element(By.CSS_SELECTOR, ".alert")
-                    alert_text = alert_elem.text.strip()
-                    logger.info(f"Alert element found: '{alert_text}'")
-
-                    # Check if alert indicates success (contains positive keywords)
-                    success_keywords = [
-                        "success",
-                        "enrolled",
-                        "booked",
-                        "confirmed",
-                        "erfolgreich",
-                        "bestätigt",
-                    ]
-                    alert_lower = alert_text.lower()
-
-                    for keyword in success_keywords:
-                        if keyword in alert_lower:
-                            logger.info(
-                                f"Booking success detected in alert: '{alert_text}'"
-                            )
-                            return True
-
-                    # If alert exists but doesn't contain success keywords, it might be an error
-                    logger.warning(
-                        f"Alert found but doesn't indicate success: '{alert_text}'"
+                    # Look for the exact success message element
+                    success_elem = self.driver.find_element(
+                        By.CSS_SELECTOR, ".success-message"
                     )
-                    return False
+                    success_text = success_elem.text.strip()
+                    logger.info(f"Success message element found: '{success_text}'")
+
+                    # Check if it contains the exact expected success message
+                    expected_message = "You have been successfully enrolled in the class highlighted below"
+                    if expected_message.lower() in success_text.lower():
+                        logger.info(f"✅ Booking success confirmed: '{success_text}'")
+                        return True
+                    else:
+                        logger.warning(
+                            f"❌ Unexpected success message: '{success_text}' - treating as failure"
+                        )
+                        return False
 
                 except NoSuchElementException:
-                    logger.info("No .alert element found")
-                    # Don't assume success - let caller decide based on HTML inspection
-                    logger.warning(
-                        "No explicit success indicator found - check saved HTML file"
-                    )
+                    # Log any other alerts found but treat as failure
+                    try:
+                        alert_elem = self.driver.find_element(By.CSS_SELECTOR, ".alert")
+                        alert_text = alert_elem.text.strip()
+                        logger.info(
+                            f"Alert element found (not success): '{alert_text}'"
+                        )
+                    except NoSuchElementException:
+                        logger.info("No alert elements found")
+
+                    # Always treat as failure if no exact success message
+                    logger.warning("❌ No exact success message found - booking failed")
                     return False
 
             except NoSuchElementException as e:
