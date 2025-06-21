@@ -199,7 +199,7 @@ class RideBerlinScraper:
                 try:
                     alert_elem = self.driver.find_element(By.CSS_SELECTOR, ".alert")
                     alert_text = alert_elem.text.strip()
-                    logger.debug(f"Alert element found: '{alert_text}'")
+                    logger.info(f"Alert element found: '{alert_text}'")
 
                     # Check if alert indicates success (contains positive keywords)
                     success_keywords = [
