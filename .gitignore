@@ -1,2 +1,4 @@
 settings.toml
 __pycache__
+data/
+logs/
