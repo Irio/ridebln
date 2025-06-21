@@ -1,3 +1,4 @@
+import os
 from dataclasses import dataclass
 from pathlib import Path
 from typing import List
@@ -48,7 +49,10 @@ class AppConfig:
 
         # Parse system section
         system_section = data.get("system", {})
-        browser_url = system_section.get("browser_url", "http://localhost:4444")
+        browser_url = os.getenv(
+            "DYNACONF_BROWSER_URL",
+            system_section.get("browser_url", "http://localhost:4444"),
+        )
         data_dir = system_section.get("data_dir", "data")
 
         # Parse automation section
