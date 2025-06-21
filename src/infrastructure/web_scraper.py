@@ -195,44 +195,24 @@ class RideBerlinScraper:
                     except NoSuchElementException:
                         logger.info("USC option not found - likely auto-selected")
 
-                        # Save complete HTML for inspection (including iframe content)
-                self._save_booking_page_content()
+                        # Wait a moment for page to load after booking
+                time.sleep(2)
 
-                # Check for success - ONLY accept the exact success message
-                # "You have been successfully enrolled in the class highlighted below"
-                try:
-                    # Look for the exact success message element
-                    success_elem = self.driver.find_element(
-                        By.CSS_SELECTOR, ".success-message"
+                # Check for success using URL pattern - most reliable method
+                current_url = self.driver.current_url
+                logger.info(f"Current page URL: {current_url}")
+
+                # Check if URL indicates success
+                if "/booksuccess/" in current_url:
+                    logger.info(
+                        "✅ Booking success detected from URL pattern (/booksuccess/)"
                     )
-                    success_text = success_elem.text.strip()
-                    logger.info(f"Success message element found: '{success_text}'")
+                    booking_success = True
+                else:
+                    logger.warning("❌ Booking failed - no success pattern in URL")
+                    booking_success = False
 
-                    # Check if it contains the exact expected success message
-                    expected_message = "You have been successfully enrolled in the class highlighted below"
-                    if expected_message.lower() in success_text.lower():
-                        logger.info(f"✅ Booking success confirmed: '{success_text}'")
-                        return True
-                    else:
-                        logger.warning(
-                            f"❌ Unexpected success message: '{success_text}' - treating as failure"
-                        )
-                        return False
-
-                except NoSuchElementException:
-                    # Log any other alerts found but treat as failure
-                    try:
-                        alert_elem = self.driver.find_element(By.CSS_SELECTOR, ".alert")
-                        alert_text = alert_elem.text.strip()
-                        logger.info(
-                            f"Alert element found (not success): '{alert_text}'"
-                        )
-                    except NoSuchElementException:
-                        logger.info("No alert elements found")
-
-                    # Always treat as failure if no exact success message
-                    logger.warning("❌ No exact success message found - booking failed")
-                    return False
+                return booking_success
 
             except NoSuchElementException as e:
                 logger.error(f"Failed to book spot {spot_number}: {e}")
@@ -243,69 +223,6 @@ class RideBerlinScraper:
             if not self.user:
                 raise Exception("User needs to sign in but no credentials provided")
             self.sign_in(self.user)
-
-    def _save_booking_page_content(self):
-        """Save the complete page content including iframe for manual inspection"""
-        from datetime import datetime
-        import os
-
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        filename = f"booking_page_{timestamp}.html"
-
-        try:
-            # Get the main page HTML
-            main_html = self.driver.page_source
-
-            # Get iframe HTML
-            iframe_html = ""
-            try:
-                with self._iframe_context():
-                    iframe_html = self.driver.page_source
-            except NoSuchElementException:
-                iframe_html = "No iframe found"
-
-            # Combine both HTMLs with clear separation
-            combined_html = f"""
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Booking Page Content - {timestamp}</title>
-    <style>
-        .section {{ border: 2px solid #ccc; margin: 20px; padding: 20px; }}
-        .section h2 {{ background: #f0f0f0; padding: 10px; margin: -20px -20px 20px -20px; }}
-        .iframe-content {{ background: #f9f9f9; }}
-    </style>
-</head>
-<body>
-    <h1>RideBerlin Booking Page Content</h1>
-    <p>Captured at: {timestamp}</p>
-    <p>Current URL: {self.driver.current_url}</p>
-    
-    <div class="section">
-        <h2>Main Page HTML</h2>
-        <div>
-{main_html}
-        </div>
-    </div>
-    
-    <div class="section iframe-content">
-        <h2>Iframe Content</h2>
-        <div>
-{iframe_html}
-        </div>
-    </div>
-</body>
-</html>
-"""
-
-            # Save to file
-            with open(filename, "w", encoding="utf-8") as f:
-                f.write(combined_html)
-
-            logger.info(f"Booking page content saved to: {filename}")
-
-        except Exception as e:
-            logger.error(f"Failed to save booking page content: {e}")
 
     def get_credit_balance(self) -> Optional[int]:
         pass

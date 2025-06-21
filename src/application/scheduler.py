@@ -28,7 +28,7 @@ class SchedulerService:
     def run_hourly_check(self):
         logger.info("Starting hourly booking check...")
 
-        with RideBerlinScraper(self.browser_url) as scraper:
+        with RideBerlinScraper(self.browser_url, self.user) as scraper:
             booking_service = BookingService(scraper, self.storage, self.user)
             credit_service = CreditService(scraper, self.storage, self.user)
 
