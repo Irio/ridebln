@@ -44,8 +44,7 @@ class BookingService:
             self.scraper.navigate_to_home()
             self.scraper.select_studio(criteria.studio)
 
-            if self.scraper.must_sign_in():
-                self.scraper.sign_in(self.user)
+            # Sign-in is now handled automatically in _ensure_signed_in
 
             matching_rides = self.scraper.find_matching_rides(criteria)
 
@@ -64,9 +63,17 @@ class BookingService:
                     spot for spot in criteria.preferred_spots if spot in available_spots
                 ]
 
+                logger.info(f"Available spots: {available_spots}")
+                logger.info(f"Preferred spots: {criteria.preferred_spots}")
+                logger.info(f"Preferred available spots: {preferred_available}")
+
                 if preferred_available:
                     spot_to_book = preferred_available[0]
-                    if self.scraper.book_spot(ride.url, spot_to_book):
+                    logger.info(f"Attempting to book spot {spot_to_book}")
+                    booking_success = self.scraper.book_spot(ride.url, spot_to_book)
+                    logger.info(f"Booking attempt result: {booking_success}")
+
+                    if booking_success:
                         booking.ride_class = ride
                         booking.spot_number = spot_to_book
                         booking.status = BookingStatus.BOOKED
@@ -77,6 +84,10 @@ class BookingService:
                             f"✅ Successfully booked spot {spot_to_book} for {criteria}"
                         )
                         return booking
+                    else:
+                        logger.warning(
+                            f"Failed to book spot {spot_to_book}, trying next available spot"
+                        )
 
             booking.status = BookingStatus.FAILED
             booking.error_message = "No preferred spots available"

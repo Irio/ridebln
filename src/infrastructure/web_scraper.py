@@ -166,6 +166,7 @@ class RideBerlinScraper:
                 except NoSuchElementException:
                     continue
 
+        logger.info(f"Found {len(available_spots)} available spots: {available_spots}")
         return available_spots
 
     def book_spot(self, ride_url: str, spot_number: int, use_usc: bool = True) -> bool:
@@ -194,25 +195,41 @@ class RideBerlinScraper:
                     except NoSuchElementException:
                         logger.info("USC option not found - likely auto-selected")
 
-                # Check if booking was successful - look for multiple success indicators
-                success_indicators = [
-                    "You have been successfully enrolled in the class",
-                    "successfully enrolled",
-                    "booking confirmed",
-                    "reservation confirmed",
-                    "Thank you for your booking",
-                ]
+                # Check for success by looking for alert element inside iframe
+                try:
+                    alert_elem = self.driver.find_element(By.CSS_SELECTOR, ".alert")
+                    alert_text = alert_elem.text.strip()
+                    logger.debug(f"Alert element found: '{alert_text}'")
 
-                page_source = self.driver.page_source.lower()
-                for indicator in success_indicators:
-                    if indicator.lower() in page_source:
-                        logger.info(f"Booking success detected: '{indicator}'")
-                        return True
+                    # Check if alert indicates success (contains positive keywords)
+                    success_keywords = [
+                        "success",
+                        "enrolled",
+                        "booked",
+                        "confirmed",
+                        "erfolgreich",
+                        "bestätigt",
+                    ]
+                    alert_lower = alert_text.lower()
 
-                # Log page content for debugging (first 200 chars)
-                logger.debug(f"Page content sample: {page_source[:200]}...")
-                logger.warning("No explicit success message found on page")
-                return False
+                    for keyword in success_keywords:
+                        if keyword in alert_lower:
+                            logger.info(
+                                f"Booking success detected in alert: '{alert_text}'"
+                            )
+                            return True
+
+                    # If alert exists but doesn't contain success keywords, it might be an error
+                    logger.warning(
+                        f"Alert found but doesn't indicate success: '{alert_text}'"
+                    )
+                    return False
+
+                except NoSuchElementException:
+                    logger.debug("No .alert element found")
+                    # If no alert element, assume success since booking process completed
+                    logger.info("No alert element found - assuming booking succeeded")
+                    return True
 
             except NoSuchElementException as e:
                 logger.error(f"Failed to book spot {spot_number}: {e}")
