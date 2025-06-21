@@ -31,18 +31,24 @@ This system uses a **layered architecture** for maintainability and extensibilit
 
 ### Current
 - ✅ **Automated Booking**: Book spinning classes based on criteria
-- ✅ **Multiple Credit Types**: Support USC, purchased, gift credits
+- ✅ **URL-based Success Detection**: Reliable booking confirmation
 - ✅ **Duplicate Prevention**: Avoid booking the same class twice
 - ✅ **Robust Sign-in**: Handle flaky login with retries
 - ✅ **iFrame Handling**: Navigate complex page structure
 - ✅ **CLI Interface**: Command-line tools for all operations
 - ✅ **File-based Storage**: Simple JSON storage for personal use
-- ✅ **Scheduling Ready**: Cron scripts for automation
+- ✅ **Docker Support**: Containerized deployment with Selenium Grid
+- ✅ **Cron Scripts**: Ready for automated scheduling
 
-### Planned Extensions
-- ⏳ **Hourly Checks**: Automated hourly booking attempts
-- ⏳ **Monthly Credit Loading**: Automatic credit purchases
-- ⏳ **Credit Purchase**: Buy additional credits when low
+### Partially Implemented
+- ⚠️ **Credit Management**: Manual credit package tracking (no live balance scraping)
+- ⚠️ **Hourly Checks**: Framework ready, but limited by credit detection
+- ⚠️ **Status Reporting**: Basic status available, credit balance shows stored data only
+
+### Not Yet Implemented
+- ❌ **Live Credit Balance**: Scraping current credits from website
+- ❌ **Automatic Credit Purchase**: Buy additional credits when low
+- ❌ **Monthly Credit Loading**: Automated monthly credit purchases
 
 ## Installation
 
@@ -117,12 +123,12 @@ preferred_spots = [1, 2, 3, 4, 5]
 python3 ridebln.py book --weekday mo --instructor Juan --time 18:00 --studio PRENZLAUER_BERG --spots 1 2 3
 ```
 
-**Manage credits**:
+**Manage credits** (manual tracking only):
 ```bash
-# View credit balance
+# View stored credit packages
 python3 ridebln.py credits
 
-# Add credit package
+# Add credit package manually
 python3 ridebln.py credits --add --name "USC March" --amount 8 --type usc
 python3 ridebln.py credits --add --name "Purchased Pack" --amount 10 --type purchased
 ```
@@ -139,9 +145,9 @@ python3 ridebln.py history
 
 **Run scheduled tasks**:
 ```bash
-python3 ridebln.py hourly   # Check for new bookings
-python3 ridebln.py monthly  # Load monthly credits
-python3 ridebln.py cleanup  # Clean old bookings
+python3 ridebln.py hourly   # Check for new bookings (requires manual credit tracking)
+python3 ridebln.py monthly  # Placeholder - manual credit purchase needed
+python3 ridebln.py cleanup  # Clean old bookings (logs only, no deletion yet)
 ```
 
 ### Automation (Raspberry Pi)
@@ -212,6 +218,24 @@ The system supports multiple credit packages:
   }
 }
 ```
+
+## Current Limitations
+
+### Credit Management
+- **No live credit balance**: The system cannot scrape your current credit balance from the website
+- **Manual tracking only**: You must manually add credit packages using the CLI
+- **No automatic purchase**: Credits cannot be purchased automatically when low
+
+### Automation Constraints
+- **Hourly checks**: Work but require manual credit balance updates to be effective
+- **Monthly credit loading**: Placeholder only - manual purchase required
+- **Cleanup**: Logs old bookings but doesn't delete them automatically
+
+### Recommended Usage
+The system works best for:
+1. **One-time bookings**: Manual booking requests work perfectly
+2. **Docker deployment**: Containerized setup is fully functional
+3. **Basic automation**: Hourly checks work if you manually manage credits
 
 ## Web Scraping Details
 
