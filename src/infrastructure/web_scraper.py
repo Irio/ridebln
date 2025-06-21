@@ -21,8 +21,9 @@ logger = logging.getLogger(__name__)
 
 
 class RideBerlinScraper:
-    def __init__(self, browser_url: str, max_retries: int = 3):
+    def __init__(self, browser_url: str, user: User = None, max_retries: int = 3):
         self.browser_url = browser_url
+        self.user = user
         self.max_retries = max_retries
         self.driver = None
 
@@ -179,17 +180,39 @@ class RideBerlinScraper:
                     return False
 
                 spot_elem.click()
+                time.sleep(1)  # Allow page to load after spot selection
                 self._ensure_signed_in()
 
                 if use_usc:
-                    usc_elem = self.driver.find_element(
-                        By.XPATH, "//a[contains(text(), 'Use USC')]"
-                    )
-                    usc_elem.click()
+                    # Try to click USC button, but don't fail if it's auto-selected
+                    try:
+                        usc_elem = self.driver.find_element(
+                            By.XPATH, "//a[contains(text(), 'Use USC')]"
+                        )
+                        usc_elem.click()
+                        logger.info("Clicked USC credit option")
+                    except NoSuchElementException:
+                        logger.info("USC option not found - likely auto-selected")
 
-                # Check if booking was successful
-                success_text = "You have been successfully enrolled in the class"
-                return success_text in self.driver.page_source
+                # Check if booking was successful - look for multiple success indicators
+                success_indicators = [
+                    "You have been successfully enrolled in the class",
+                    "successfully enrolled",
+                    "booking confirmed",
+                    "reservation confirmed",
+                    "Thank you for your booking",
+                ]
+
+                page_source = self.driver.page_source.lower()
+                for indicator in success_indicators:
+                    if indicator.lower() in page_source:
+                        logger.info(f"Booking success detected: '{indicator}'")
+                        return True
+
+                # Log page content for debugging (first 200 chars)
+                logger.debug(f"Page content sample: {page_source[:200]}...")
+                logger.warning("No explicit success message found on page")
+                return False
 
             except NoSuchElementException as e:
                 logger.error(f"Failed to book spot {spot_number}: {e}")
@@ -197,7 +220,9 @@ class RideBerlinScraper:
 
     def _ensure_signed_in(self):
         if self.must_sign_in():
-            raise Exception("User needs to sign in but no credentials provided")
+            if not self.user:
+                raise Exception("User needs to sign in but no credentials provided")
+            self.sign_in(self.user)
 
     def get_credit_balance(self) -> Optional[int]:
         pass

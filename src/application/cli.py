@@ -26,7 +26,11 @@ def setup_arguments():
     # Book command
     book_parser = subparsers.add_parser("book", help="Book a single ride")
     book_parser.add_argument(
-        "--weekday", type=str, required=True, help="Weekday (e.g., mo, tu, we)"
+        "--weekday",
+        type=str,
+        required=True,
+        choices=["so", "mo", "di", "mi", "do", "fr", "sa"],
+        help="Weekday using German abbreviations: so=Sunday, mo=Monday, di=Tuesday, mi=Wednesday, do=Thursday, fr=Friday, sa=Saturday",
     )
     book_parser.add_argument(
         "--instructor", type=str, required=True, help="Instructor name"
@@ -88,7 +92,7 @@ def create_services(config: AppConfig, browser_url: str = None):
     storage = FileStorage(config.data_dir)
     user = User(email=config.user_email, password=config.user_password)
 
-    scraper = RideBerlinScraper(actual_browser_url)
+    scraper = RideBerlinScraper(actual_browser_url, user)
 
     return scraper, storage, user
 
