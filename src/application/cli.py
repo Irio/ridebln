@@ -94,11 +94,18 @@ def create_services(config: AppConfig, browser_url: str = None):
 
 
 def handle_book_command(args, config: AppConfig):
+    # Convert CLI studio format to enum format
+    studio_mapping = {
+        "CHARLOTTENBURG": StudioLocation.CHARLOTTENBURG,
+        "MITTE": StudioLocation.MITTE,
+        "PRENZLAUER_BERG": StudioLocation.PRENZLAUER_BERG,
+    }
+
     criteria = BookingCriteria(
         weekday=args.weekday,
         instructor=args.instructor,
         time=args.time,
-        studio=StudioLocation(args.studio),
+        studio=studio_mapping[args.studio],
         preferred_spots=args.spots,
     )
 
