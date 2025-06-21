@@ -23,48 +23,47 @@ class BookingService:
         self.scraper = scraper
         self.storage = storage
         self.user = user
-        
+
     def search_and_book(self, criteria: BookingCriteria) -> Optional[Booking]:
         if self.storage.has_existing_booking_for_criteria(criteria):
             logger.info(f"Already have a booking for {criteria}")
             return None
-            
+
         booking = Booking(
             id=None,
             criteria=criteria,
             ride_class=None,
             spot_number=None,
             status=BookingStatus.PENDING,
-            created_at=datetime.now()
+            created_at=datetime.now(),
         )
-        
+
         try:
             self.storage.save_booking(booking)
-            
+
             self.scraper.navigate_to_home()
             self.scraper.select_studio(criteria.studio)
-            
+
             if self.scraper.must_sign_in():
                 self.scraper.sign_in(self.user)
-                
+
             matching_rides = self.scraper.find_matching_rides(criteria)
-            
+
             if not matching_rides:
                 booking.status = BookingStatus.FAILED
                 booking.error_message = "No matching rides found"
                 self.storage.save_booking(booking)
                 logger.warning(f"No matching rides found for {criteria}")
                 return booking
-                
+
             for ride in matching_rides:
                 available_spots = self.scraper.get_available_spots(ride.url)
                 ride.available_spots = available_spots
-                
+
                 preferred_available = [
-                    spot for spot in criteria.preferred_spots 
-                    if spot in available_spots
+                    spot for spot in criteria.preferred_spots if spot in available_spots
                 ]
-                
+
                 if preferred_available:
                     spot_to_book = preferred_available[0]
                     if self.scraper.book_spot(ride.url, spot_to_book):
@@ -73,36 +72,38 @@ class BookingService:
                         booking.status = BookingStatus.BOOKED
                         booking.booked_at = datetime.now()
                         self.storage.save_booking(booking)
-                        
-                        logger.info(f"✅ Successfully booked spot {spot_to_book} for {criteria}")
+
+                        logger.info(
+                            f"✅ Successfully booked spot {spot_to_book} for {criteria}"
+                        )
                         return booking
-                        
+
             booking.status = BookingStatus.FAILED
             booking.error_message = "No preferred spots available"
             self.storage.save_booking(booking)
             logger.warning(f"No preferred spots available for {criteria}")
             return booking
-            
+
         except Exception as e:
             logger.error(f"Failed to book {criteria}: {e}")
             booking.status = BookingStatus.FAILED
             booking.error_message = str(e)
             self.storage.save_booking(booking)
             return booking
-            
+
     def get_booking_history(self, limit: int = 50) -> List[Booking]:
         return self.storage.get_recent_bookings(limit)
-        
+
     def get_active_bookings(self) -> List[Booking]:
         pending = self.storage.get_bookings_by_status(BookingStatus.PENDING)
         booked = self.storage.get_bookings_by_status(BookingStatus.BOOKED)
         return pending + booked
-        
+
     def cancel_booking(self, booking_id: str) -> bool:
         booking = self.storage.get_booking(booking_id)
         if not booking:
             return False
-            
+
         booking.status = BookingStatus.CANCELLED
         self.storage.save_booking(booking)
         return True
@@ -113,11 +114,11 @@ class CreditService:
         self.scraper = scraper
         self.storage = storage
         self.user = user
-        
+
     def get_credit_balance(self) -> Optional[CreditBalance]:
         # Try to get from storage first
         balance = self.storage.get_credit_balance()
-        
+
         # If no balance or old data, try to refresh from website
         if not balance or (datetime.now() - balance.last_updated).days > 1:
             try:
@@ -125,35 +126,39 @@ class CreditService:
                 # For now, return stored balance or create empty one
                 if not balance:
                     balance = CreditBalance()
-                    
-                logger.info("Credit balance check - implement scraper.get_credit_balance() for live data")
-                
+
+                logger.info(
+                    "Credit balance check - implement scraper.get_credit_balance() for live data"
+                )
+
             except Exception as e:
                 logger.error(f"Failed to refresh credit balance: {e}")
-                
+
         return balance
-        
-    def update_credit_package(self, package_name: str, credits: int, credit_type: CreditType):
+
+    def update_credit_package(
+        self, package_name: str, credits: int, credit_type: CreditType
+    ):
         balance = self.get_credit_balance() or CreditBalance()
-        
+
         package = CreditPackage(
             type=credit_type,
             name=package_name,
             remaining_credits=credits,
-            last_updated=datetime.now()
+            last_updated=datetime.now(),
         )
-        
+
         balance.add_package(package)
         self.storage.save_credit_balance(balance)
-        
+
         logger.info(f"Updated {package_name}: {credits} {credit_type.value} credits")
-        
+
     def use_credit(self, preferred_type: CreditType = None) -> bool:
         balance = self.get_credit_balance()
         if not balance:
             logger.warning("No credit balance available")
             return False
-            
+
         if balance.use_credit(preferred_type):
             self.storage.save_credit_balance(balance)
             logger.info(f"Used 1 credit, {balance.total_remaining_credits} remaining")
@@ -161,18 +166,20 @@ class CreditService:
         else:
             logger.warning("No credits available to use")
             return False
-            
+
     def needs_credit_refill(self) -> bool:
         balance = self.get_credit_balance()
         return balance is None or balance.needs_refill
-        
+
     def get_credit_summary(self) -> str:
         balance = self.get_credit_balance()
         if not balance:
             return "No credit information available"
-            
+
         lines = [f"Total credits: {balance.total_remaining_credits}"]
         for name, package in balance.packages.items():
-            lines.append(f"  - {name}: {package.remaining_credits} ({package.type.value})")
-            
-        return "\n".join(lines) 
+            lines.append(
+                f"  - {name}: {package.remaining_credits} ({package.type.value})"
+            )
+
+        return "\n".join(lines)
