@@ -1,8 +1,16 @@
-dynaconf==3.2.10
+# Core dependencies
 selenium==4.31.0
+dynaconf==3.2.10
 
-# dev
+# New dependencies for refactored architecture
+schedule==1.2.0  # For scheduling support
+apscheduler==3.10.4  # Advanced scheduling
+click==8.1.7  # CLI framework (alternative to argparse)
+
+# Dev dependencies
 black==25.1.0
 debugpy==1.8.14
 ipdb==0.13.13
 isort==6.0.1
+pytest==8.0.0
+pytest-mock==3.12.0

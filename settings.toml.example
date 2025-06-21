@@ -1,12 +1,40 @@
+# RideBerlin Booking System Configuration
+
 [user]
-email = "my_email@example.com"
-password = "my_secret_password"
+email = "your_email@example.com"
+password = "your_secret_password"
 
-[studio]
-name = "PRENZLAUER BERG"
-favorite_spots = [1, 2, 3]
+[system]
+browser_url = "http://localhost:4444"  # Selenium Grid URL
+data_dir = "data"  # Directory for storing JSON files
 
+[automation]
+auto_purchase_credits = false  # Set to true to automatically purchase credits when low
+credit_threshold = 2  # Minimum credits before triggering purchase
+monthly_credit_amount = 20  # Credits to purchase monthly/when low
+
+[logging]
+level = "INFO"  # DEBUG, INFO, WARNING, ERROR
+file = "logs/ridebln.log"
+
+# Multiple booking criteria can be specified
 [[booking_criteria]]
 weekday = "mo"
 instructor = "Juan"
 time = "18:00"
+studio = "PRENZLAUER BERG"  # CHARLOTTENBURG, MITTE, PRENZLAUER BERG
+preferred_spots = [1, 2, 3, 4, 5]
+
+[[booking_criteria]]
+weekday = "we"
+instructor = "Maria"
+time = "19:30"
+studio = "MITTE"
+preferred_spots = [10, 11, 12]
+
+[[booking_criteria]]
+weekday = "fr"
+instructor = "Alex"
+time = "17:00"
+studio = "CHARLOTTENBURG"
+preferred_spots = [5, 6, 7, 8]
